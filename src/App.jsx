@@ -1,36 +1,56 @@
 import React, { useState } from "react";
+import { atom, RecoilRoot, useRecoilSnapshot, useRecoilState } from "recoil";
 
-
-
+const todoAtom = atom({
+  key:"todoState",
+  default: {
+    todo: [],
+    completed: []
+  }
+})
 function App() {
   return (
-    <div className="w-full min-h-screen bg-zinc-900 text-white flex justify-center items-start p-6">
-      <TodoApp />
-    </div>
+    <RecoilRoot>
+      <div className="w-full min-h-screen bg-zinc-900 text-white flex justify-center items-start p-6">
+        <TodoApp />
+      </div>
+    </RecoilRoot>
   )
 }
 
 function TodoApp() {
   const [text, setText] = useState("");
-  const [todo, setTodo] = useState([]);
-  const [completed, setCompleted] = useState([]);
+  const [todoTask, setTodoTask] = useRecoilState(todoAtom);
+  const {todo, completed} = todoTask;
+
   function addTodo() {
     if(text.trim()) {
-      setTodo([...todo, text.trim()])
+      setTodoTask({
+        ...todoTask,
+        todo: [...todo, text.trim()]})
       setText("")
     }
   }
   function deleteTodo(index) {
     const newTodos = todo.filter((_, i)=>i!== index);
-    setTodo(newTodos)
+    setTodoTask({
+      ...todoTask,
+      todo: newTodos
+    })
   }
   function taskDone(index) {
-    deleteTodo(index);
     const newTodo = todo[index];
-    setCompleted([...completed, newTodo])
+    const newTodos = todo.filter((_, i) => i !== index);
+    setTodoTask({
+      todo: newTodos,
+      completed: [...completed, newTodo]
+    });
   }
   function clearAll(){
-    setTodo([])
+    setTodoTask({
+      ...todoTask,
+      todo: []
+    })
   }
   return (
     <div className="bg-zinc-800 w-full sm:w-[90%] md:w-[70%] lg:w-[40%] p-6 rounded-2xl shadow-2xl">
